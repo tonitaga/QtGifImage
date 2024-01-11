@@ -22,8 +22,9 @@
 ** WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#ifndef QGIFGLOBAL_H
-#define QGIFGLOBAL_H
+#ifndef GIF_IMAGE_Q_GIF_GLOBAL_H_
+#define GIF_IMAGE_Q_GIF_GLOBAL_H_
+
 #include <QtGlobal>
 
 #if !defined(QT_STATIC) && !defined(GIFIMAGE_NO_LIB)
@@ -36,4 +37,4 @@
 #  define Q_GIFIMAGE_EXPORT
 #endif
 
-#endif // QGIFGLOBAL_H
+#endif // GIF_IMAGE_Q_GIF_GLOBAL_H_

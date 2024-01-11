@@ -22,53 +22,53 @@
 ** WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#ifndef QGIFIMAGE_P_H
-#define QGIFIMAGE_P_H
+#ifndef GIF_IMAGE_Q_GIF_IMAGE_P_H_
+#define GIF_IMAGE_Q_GIF_IMAGE_P_H_
 
-#include "qgifimage.h"
-#include "gif_lib.h"
+#include <giflib/gif_lib.h>
+#include <gifimage/qgifimage_p.h>
 
 #include <QVector>
 #include <QColor>
 
-class QGifFrameInfoData
-{
-public:
-    QGifFrameInfoData()
-        :delayTime(-1), interlace(false)
-    {
+struct QGifFrameInfoData {
+  QGifFrameInfoData() : delayTime(-1), interlace(false) {}
 
-    }
-    QImage image;
-    QPoint offset; //offset info of QImage will lost when convert from One format to another.
-    int delayTime;
-    bool interlace;
-    QColor transparentColor;
+public:
+  QImage image;
+  QPoint offset; //offset info of QImage will lost when convert from One format to another.
+  int delayTime;
+  bool interlace;
+  QColor transparentColor;
 };
 
-class QGifImagePrivate
-{
-    Q_DECLARE_PUBLIC(QGifImage)
+class QGifImagePrivate {
+  Q_DECLARE_PUBLIC(QGifImage)
 public:
-    QGifImagePrivate(QGifImage *p);
-    ~QGifImagePrivate();
-    bool load(QIODevice *device);
-    bool save(QIODevice *device) const;
-    QVector<QRgb> colorTableFromColorMapObject(ColorMapObject *object, int transColorIndex=-1) const;
-    ColorMapObject * colorTableToColorMapObject(QVector<QRgb> colorTable) const;
-    QSize getCanvasSize() const;
-    int getFrameTransparentColorIndex(const QGifFrameInfoData &info) const;
+  explicit QGifImagePrivate(QGifImage *p);
+  ~QGifImagePrivate() = default;
 
-    QSize canvasSize;
-    int loopCount;
-    int defaultDelayTime;
-    QColor defaultTransparentColor;
+public:
+  bool load(QIODevice *device);
+  bool save(QIODevice *device) const;
 
-    QVector<QRgb> globalColorTable;
-    QColor bgColor;
-    QList<QGifFrameInfoData> frameInfos;
+  QVector<QRgb> colorTableFromColorMapObject(ColorMapObject *object, int transColorIndex = -1) const;
+  [[nodiscard]] ColorMapObject *colorTableToColorMapObject(QVector<QRgb> colorTable) const;
 
-    QGifImage *q_ptr;
+  [[nodiscard]] QSize getCanvasSize() const;
+  [[nodiscard]] int getFrameTransparentColorIndex(const QGifFrameInfoData &info) const;
+
+public:
+  QSize canvasSize;
+  int loopCount;
+  int defaultDelayTime;
+  QColor defaultTransparentColor;
+
+  QVector<QRgb> globalColorTable;
+  QColor bgColor;
+  QList<QGifFrameInfoData> frameInfos;
+
+  QGifImage *q_ptr;
 };
 
-#endif // QGIFIMAGE_P_H
+#endif // GIF_IMAGE_Q_GIF_IMAGE_P_H_

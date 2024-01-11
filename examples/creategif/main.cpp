@@ -1,8 +1,9 @@
-#include "qgifimage.h"
-#include <QPainter>
-#include <QImage>
-#include <QGuiApplication>
 #include <QDebug>
+#include <QImage>
+#include <QPainter>
+#include <QGuiApplication>
+
+#include <gifimage/qgifimage.h>
 
 int main(int argc, char **argv)
 {
@@ -39,7 +40,7 @@ int main(int argc, char **argv)
     }
     //![2]
     //![3]
-    gif.save(SRCDIR"demo1.gif");
+    gif.save("demo1.gif");
     //![3]
 
     return 0;

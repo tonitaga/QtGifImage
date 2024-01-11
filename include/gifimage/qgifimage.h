@@ -45,21 +45,21 @@ public:
   ~QGifImage();
 
 public:
-  [[nodiscard]] QVector<QRgb> globalColorTable() const;
-  [[nodiscard]] QColor backgroundColor() const;
+  QVector<QRgb> globalColorTable() const;
+  QColor backgroundColor() const;
 
   void setGlobalColorTable(const QVector<QRgb> &colors, const QColor &bgColor = QColor());
-  [[nodiscard]] int defaultDelay() const;
+  int defaultDelay() const;
 
   void setDefaultDelay(int internal);
-  [[nodiscard]] QColor defaultTransparentColor() const;
+  QColor defaultTransparentColor() const;
   void setDefaultTransparentColor(const QColor &color);
 
-  [[nodiscard]] int loopCount() const;
+  int loopCount() const;
   void setLoopCount(int loop);
 
-  [[nodiscard]] int frameCount() const;
-  [[nodiscard]] QImage frame(int index) const;
+  int frameCount() const;
+  QImage frame(int index) const;
 
   void addFrame(const QImage &frame, int delay = -1);
   void addFrame(const QImage &frame, const QPoint &offset, int delay = -1);
@@ -67,20 +67,20 @@ public:
   void insertFrame(int index, const QImage &frame, int delay = -1);
   void insertFrame(int index, const QImage &frame, const QPoint &offset, int delay = -1);
 
-  [[nodiscard]] QPoint frameOffset(int index) const;
+  QPoint frameOffset(int index) const;
   void setFrameOffset(int index, const QPoint &offset);
 
-  [[nodiscard]] int frameDelay(int index) const;
+  int frameDelay(int index) const;
   void setFrameDelay(int index, int delay);
 
-  [[nodiscard]] QColor frameTransparentColor(int index) const;
+  QColor frameTransparentColor(int index) const;
   void setFrameTransparentColor(int index, const QColor &color);
 
   bool load(QIODevice *device);
   bool load(const QString &fileName);
 
   bool save(QIODevice *device) const;
-  [[nodiscard]] bool save(const QString &fileName) const;
+  bool save(const QString &fileName) const;
 
 private:
   QGifImagePrivate *const d_ptr;

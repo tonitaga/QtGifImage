@@ -1,4 +1,4 @@
-#include "qgifimage.h"
+#include <gifimage/qgifimage.h>
 #include <QDebug>
 
 int main()

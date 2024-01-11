@@ -33,8 +33,10 @@
 #include <QVector>
 
 class QGifImagePrivate;
-class Q_GIFIMAGE_EXPORT QGifImage {
+
+class QGifImage {
   Q_DECLARE_PRIVATE(QGifImage)
+
 public:
   QGifImage();
   explicit QGifImage(const QString &fileName);

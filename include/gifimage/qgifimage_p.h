@@ -44,6 +44,7 @@ public:
 
 class QGifImagePrivate {
   Q_DECLARE_PUBLIC(QGifImage)
+
 public:
   explicit QGifImagePrivate(QGifImage *p);
   ~QGifImagePrivate() = default;

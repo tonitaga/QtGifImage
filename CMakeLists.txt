@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5...3.16)
-project(QGifImage)
+project(QtGifImage)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -7,31 +7,28 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-include(cmake/include.cmake)
-
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
+set(GIF_IMAGE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include/gifimage)
+set(GIF_LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include/third_party/giflib)
+
 add_library(${PROJECT_NAME} SHARED
-    include/gifimage/qgifglobal.h
-    include/gifimage/qgifimage.cpp
-    include/gifimage/qgifimage.h
-    include/gifimage/qgifimage_p.h
-    include/third_party/giflib/dgif_lib.c
-    include/third_party/giflib/egif_lib.c
-    include/third_party/giflib/gif_err.c
-    include/third_party/giflib/gif_font.c
-    include/third_party/giflib/gif_hash.c
-    include/third_party/giflib/gif_hash.h
-    include/third_party/giflib/gif_lib.h
-    include/third_party/giflib/gif_lib_private.h
-    include/third_party/giflib/gifalloc.c
-    include/third_party/giflib/quantize.c
+    ${GIF_IMAGE_DIR}/qgifglobal.h ${GIF_IMAGE_DIR}/qgifimage.cpp
+    ${GIF_IMAGE_DIR}/qgifimage.h  ${GIF_IMAGE_DIR}/qgifimage_p.h
+
+    ${GIF_LIB_DIR}/dgif_lib.c ${GIF_LIB_DIR}/egif_lib.c
+    ${GIF_LIB_DIR}/gif_err.c  ${GIF_LIB_DIR}/gif_font.c
+    ${GIF_LIB_DIR}/gif_hash.c ${GIF_LIB_DIR}/gif_hash.h
+    ${GIF_LIB_DIR}/gif_lib.h  ${GIF_LIB_DIR}/gif_lib_private.h
+    ${GIF_LIB_DIR}/gifalloc.c ${GIF_LIB_DIR}/quantize.c
 )
 
-set(LIB_LINK_LIBRARIES
-        Qt${QT_VERSION_MAJOR}::Core
-        Qt${QT_VERSION_MAJOR}::Gui
-)
+add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE ${LIB_LINK_LIBRARIES})
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/third_party)
+
+set(LIB_LIBRARIES Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Gui)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE ${LIB_LIBRARIES})

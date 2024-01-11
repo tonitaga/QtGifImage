@@ -26,7 +26,7 @@
 #define GIF_IMAGE_Q_GIF_IMAGE_P_H_
 
 #include <giflib/gif_lib.h>
-#include <gifimage/qgifimage_p.h>
+#include <gifimage/qgifimage.h>
 
 #include <QVector>
 #include <QColor>

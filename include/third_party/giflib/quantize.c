@@ -14,7 +14,6 @@
 #include <stdlib.h>
 
 #include <giflib/gif_lib.h>
-#include <giflib/gif_lib_private.h>
 
 #define ABS(x)    ((x) > 0 ? (x) : (-(x)))
 
@@ -59,9 +58,9 @@ int
 GifQuantizeBuffer(unsigned int Width,
 				  unsigned int Height,
 				  int *ColorMapSize,
-				  GifByteType *RedInput,
-				  GifByteType *GreenInput,
-				  GifByteType *BlueInput,
+				  const GifByteType *RedInput,
+				  const GifByteType *GreenInput,
+				  const GifByteType *BlueInput,
 				  GifByteType *OutputBuffer,
 				  GifColorType *OutputColorMap) {
 
@@ -258,8 +257,8 @@ SubdivColorMap(NewColorMapType *NewColorSubdiv,
 	  Count += QuantizedColor->Count;
 	}
 	/* Save the values of the last color of the first half, and first
-	 * of the second half so we can update the Bounding Boxes later.
-	 * Also as the colors are quantized and the BBoxes are full 0..255,
+	 * of the second half, so we can update the Bounding Boxes later.
+	 * Also, as the colors are quantized and the BBoxes are full 0..255,
 	 * they need to be rescaled.
 	 */
 	MaxColor = QuantizedColor->RGB[SortRGBAxis]; /* Max. of first half */

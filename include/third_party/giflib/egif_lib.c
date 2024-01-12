@@ -35,7 +35,7 @@ static const GifPixelType CodeMask[] = {
 
 static int EGifPutWord(int Word, GifFileType *GifFile);
 static int EGifSetupCompress(GifFileType *GifFile);
-static int EGifCompressLine(GifFileType *GifFile, GifPixelType *Line,
+static int EGifCompressLine(GifFileType *GifFile, const GifPixelType *Line,
 							int LineLen);
 static int EGifCompressOutput(GifFileType *GifFile, int Code);
 static int EGifBufferedOutput(GifFileType *GifFile, GifByteType *Buf,
@@ -241,9 +241,9 @@ static int InternalWrite(GifFileType *GifFileOut,
 						 const unsigned char *buf, size_t len) {
   GifFilePrivateType *Private = (GifFilePrivateType *)GifFileOut->Private;
   if (Private->Write)
-	return Private->Write(GifFileOut, buf, len);
+	return Private->Write(GifFileOut, buf, (int)(len));
   else
-	return fwrite(buf, 1, len, Private->File);
+	return (int)(fwrite(buf, 1, len, Private->File));
 }
 
 /******************************************************************************
@@ -491,7 +491,7 @@ EGifPutComment(GifFileType *GifFile, const char *Comment) {
   length = strlen(Comment);
   if (length <= 255) {
 	return EGifPutExtension(GifFile, COMMENT_EXT_FUNC_CODE,
-							length, Comment);
+							(int)(length), Comment);
   } else {
 	buf = (char *)Comment;
 	if (EGifPutExtensionLeader(GifFile, COMMENT_EXT_FUNC_CODE)
@@ -509,7 +509,7 @@ EGifPutComment(GifFileType *GifFile, const char *Comment) {
 	}
 	/* Output any partial block and the clear code. */
 	if (length > 0) {
-	  if (EGifPutExtensionBlock(GifFile, length, buf) == GIF_ERROR) {
+	  if (EGifPutExtensionBlock(GifFile, (int)(length), buf) == GIF_ERROR) {
 		return GIF_ERROR;
 	  }
 	}
@@ -904,7 +904,7 @@ EGifSetupCompress(GifFileType *GifFile) {
 ******************************************************************************/
 static int
 EGifCompressLine(GifFileType *GifFile,
-				 GifPixelType *Line,
+				 const GifPixelType *Line,
 				 const int LineLen) {
   int i = 0, CrntCode, NewCode;
   unsigned long NewKey;
@@ -1000,7 +1000,7 @@ EGifCompressOutput(GifFileType *GifFile,
 	while (Private->CrntShiftState > 0) {
 	  /* Get Rid of what is left in DWord, and flush it. */
 	  if (EGifBufferedOutput(GifFile, Private->Buf,
-							 Private->CrntShiftDWord & 0xff) == GIF_ERROR)
+							 (int)(Private->CrntShiftDWord & 0xff)) == GIF_ERROR)
 		retval = GIF_ERROR;
 	  Private->CrntShiftDWord >>= 8;
 	  Private->CrntShiftState -= 8;
@@ -1015,7 +1015,7 @@ EGifCompressOutput(GifFileType *GifFile,
 	while (Private->CrntShiftState >= 8) {
 	  /* Dump out full bytes: */
 	  if (EGifBufferedOutput(GifFile, Private->Buf,
-							 Private->CrntShiftDWord & 0xff) == GIF_ERROR)
+							 (int)(Private->CrntShiftDWord & 0xff)) == GIF_ERROR)
 		retval = GIF_ERROR;
 	  Private->CrntShiftDWord >>= 8;
 	  Private->CrntShiftState -= 8;

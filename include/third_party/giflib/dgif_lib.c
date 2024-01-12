@@ -37,7 +37,7 @@ static int DGifGetWord(GifFileType *GifFile, GifWord *Word);
 static int DGifSetupDecompress(GifFileType *GifFile);
 static int DGifDecompressLine(GifFileType *GifFile, GifPixelType *Line,
 							  int LineLen);
-static int DGifGetPrefixChar(GifPrefixType *Prefix, int Code, int ClearCode);
+static int DGifGetPrefixChar(const GifPrefixType *Prefix, int Code, int ClearCode);
 static int DGifDecompressInput(GifFileType *GifFile, int *Code);
 static int DGifBufferedInput(GifFileType *GifFile, GifByteType *Buf,
 							 GifByteType *NextByte);
@@ -836,7 +836,7 @@ DGifDecompressLine(GifFileType *GifFile, GifPixelType *Line, int LineLen) {
 		while (StackPtr < LZ_MAX_CODE &&
 			CrntPrefix > ClearCode && CrntPrefix <= LZ_MAX_CODE) {
 		  Stack[StackPtr++] = Suffix[CrntPrefix];
-		  CrntPrefix = Prefix[CrntPrefix];
+		  CrntPrefix = (int)(Prefix[CrntPrefix]);
 		}
 		if (StackPtr >= LZ_MAX_CODE || CrntPrefix > LZ_MAX_CODE) {
 		  GifFile->Error = D_GIF_ERR_IMAGE_DEFECT;
@@ -881,14 +881,14 @@ DGifDecompressLine(GifFileType *GifFile, GifPixelType *Line, int LineLen) {
  the maximum possible if image O.k. - LZ_MAX_CODE times.
 ******************************************************************************/
 static int
-DGifGetPrefixChar(GifPrefixType *Prefix, int Code, int ClearCode) {
+DGifGetPrefixChar(const GifPrefixType *Prefix, int Code, int ClearCode) {
   int i = 0;
 
   while (Code > ClearCode && i++ <= LZ_MAX_CODE) {
 	if (Code > LZ_MAX_CODE) {
 	  return NO_SUCH_CODE;
 	}
-	Code = Prefix[Code];
+	Code = (int)(Prefix[Code]);
   }
   return Code;
 }
@@ -963,7 +963,7 @@ DGifDecompressInput(GifFileType *GifFile, int *Code) {
 		((unsigned long)NextByte) << Private->CrntShiftState;
 	Private->CrntShiftState += 8;
   }
-  *Code = Private->CrntShiftDWord & CodeMasks[Private->RunningBits];
+  *Code = (int)(Private->CrntShiftDWord & CodeMasks[Private->RunningBits]);
 
   Private->CrntShiftDWord >>= Private->RunningBits;
   Private->CrntShiftState -= Private->RunningBits;
@@ -1089,7 +1089,7 @@ DGifSlurp(GifFileType *GifFile) {
 			  return GIF_ERROR;
 		  }
 	  } else {
-		if (DGifGetLine(GifFile, sp->RasterBits, ImageSize) == GIF_ERROR)
+		if (DGifGetLine(GifFile, sp->RasterBits, (int)(ImageSize)) == GIF_ERROR)
 		  return (GIF_ERROR);
 	  }
 
@@ -1125,8 +1125,6 @@ DGifSlurp(GifFileType *GifFile) {
 			return (GIF_ERROR);
 	  }
 	  break;
-
-	case TERMINATE_RECORD_TYPE: break;
 
 	default:    /* Should be trapped by DGifGetRecordType */
 	  break;

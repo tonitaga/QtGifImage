@@ -19,16 +19,21 @@ extern "C" {
 #define GIF_OK      1
 
 #include <stddef.h>
-#ifdef _MSC_VER
+
 #define BOOL int
 #define TRUE 1
 #define FALSE 0
-#else
-#include <stdbool.h>
-#define BOOL _Bool
-#define TRUE 1
-#define FALSE 0
-#endif
+
+//#ifdef _MSC_VER
+//#define BOOL int
+//#define TRUE 1
+//#define FALSE 0
+//#else
+//#include <stdbool.h>
+//#define BOOL int
+//#define TRUE 1
+//#define FALSE 0
+//#endif
 
 #define GIF_STAMP "GIFVER"          /* First chars in file - GIF stamp.  */
 #define GIF_STAMP_LEN sizeof(GIF_STAMP) - 1
@@ -115,16 +120,17 @@ typedef int (*OutputFunc)(GifFileType *, const GifByteType *, int);
  GIF89 structures
 ******************************************************************************/
 
-typedef struct GraphicsControlBlock {
-  int DisposalMode;
 #define DISPOSAL_UNSPECIFIED      0       /* No disposal specified. */
 #define DISPOSE_DO_NOT            1       /* Leave image in place */
 #define DISPOSE_BACKGROUND        2       /* Set area too background color */
 #define DISPOSE_PREVIOUS          3       /* Restore to previous content */
+#define NO_TRANSPARENT_COLOR    (-1)
+
+typedef struct GraphicsControlBlock {
+  int DisposalMode;
   BOOL UserInputFlag;      /* User confirmation required before disposal */
   int DelayTime;           /* pre-display delay in 0.01sec units */
   int TransparentColor;    /* Palette index for transparency, -1 if none */
-#define NO_TRANSPARENT_COLOR    -1
 } GraphicsControlBlock;
 
 /******************************************************************************
@@ -133,8 +139,8 @@ typedef struct GraphicsControlBlock {
 
 /* Main entry points */
 GifFileType *EGifOpenFileName(const char *GifFileName,
-							  const BOOL GifTestExistence, int *Error);
-GifFileType *EGifOpenFileHandle(const int GifFileHandle, int *Error);
+							  BOOL GifTestExistence, int *Error);
+GifFileType *EGifOpenFileHandle(int GifFileHandle, int *Error);
 GifFileType *EGifOpen(void *userPtr, OutputFunc writeFunc, int *Error);
 int EGifSpew(GifFileType *GifFile);
 char *EGifGetGifVersion(GifFileType *GifFile); /* new in 5.x */
@@ -154,26 +160,25 @@ int EGifCloseFile1(GifFileType *GifFile);
 
 /* These are legacy.  You probably do not want to call them directly */
 int EGifPutScreenDesc(GifFileType *GifFile,
-					  const int GifWidth, const int GifHeight,
-					  const int GifColorRes,
-					  const int GifBackGround,
+					  int GifWidth, int GifHeight,
+					  int GifColorRes, int GifBackGround,
 					  const ColorMapObject *GifColorMap);
 int EGifPutImageDesc(GifFileType *GifFile,
-					 const int GifLeft, const int GifTop,
-					 const int GifWidth, const int GifHeight,
-					 const BOOL GifInterlace,
+					 int GifLeft, int GifTop,
+					 int GifWidth, int GifHeight,
+					 BOOL GifInterlace,
 					 const ColorMapObject *GifColorMap);
-void EGifSetGifVersion(GifFileType *GifFile, const BOOL gif89);
+void EGifSetGifVersion(GifFileType *GifFile, BOOL gif89);
 int EGifPutLine(GifFileType *GifFile, GifPixelType *GifLine,
 				int GifLineLen);
-int EGifPutPixel(GifFileType *GifFile, const GifPixelType GifPixel);
+int EGifPutPixel(GifFileType *GifFile, GifPixelType GifPixel);
 int EGifPutComment(GifFileType *GifFile, const char *GifComment);
-int EGifPutExtensionLeader(GifFileType *GifFile, const int GifExtCode);
+int EGifPutExtensionLeader(GifFileType *GifFile, int GifExtCode);
 int EGifPutExtensionBlock(GifFileType *GifFile,
-						  const int GifExtLen, const void *GifExtension);
+						  int GifExtLen, const void *GifExtension);
 int EGifPutExtensionTrailer(GifFileType *GifFile);
-int EGifPutExtension(GifFileType *GifFile, const int GifExtCode,
-					 const int GifExtLen,
+int EGifPutExtension(GifFileType *GifFile, int GifExtCode,
+					 int GifExtLen,
 					 const void *GifExtension);
 int EGifPutCode(GifFileType *GifFile, const GifByteType *GifCodeBlock);
 int EGifPutCodeNext(GifFileType *GifFile,
@@ -223,8 +228,8 @@ int DGifGetLZCodes(GifFileType *GifFile, int *GifCode);
  Color table quantization (deprecated)
 ******************************************************************************/
 int GifQuantizeBuffer(unsigned int Width, unsigned int Height,
-					  int *ColorMapSize, GifByteType *RedInput,
-					  GifByteType *GreenInput, GifByteType *BlueInput,
+					  int *ColorMapSize, const GifByteType *RedInput,
+					  const GifByteType *GreenInput, const GifByteType *BlueInput,
 					  GifByteType *OutputBuffer,
 					  GifColorType *OutputColorMap);
 
@@ -254,7 +259,7 @@ extern int GifBitSize(int n);
  Support for the in-core structures allocation (slurp mode).
 ******************************************************************************/
 
-extern void GifApplyTranslation(SavedImage *Image, GifPixelType Translation[]);
+extern void GifApplyTranslation(SavedImage *Image, const GifPixelType Translation[]);
 extern int GifAddExtensionBlock(int *ExtensionBlock_Count,
 								ExtensionBlock **ExtensionBlocks,
 								int Function,
@@ -270,7 +275,7 @@ extern void GifFreeSavedImages(GifFileType *GifFile);
  5.x functions for GIF89 graphics control blocks
 ******************************************************************************/
 
-int DGifExtensionToGCB(const size_t GifExtensionLength,
+int DGifExtensionToGCB(size_t GifExtensionLength,
 					   const GifByteType *GifExtension,
 					   GraphicsControlBlock *GCB);
 size_t EGifGCBToExtension(const GraphicsControlBlock *GCB,
@@ -292,21 +297,21 @@ int EGifGCBToSavedExtension(const GraphicsControlBlock *GCB,
 extern const unsigned char GifAsciiTable8x8[][GIF_FONT_WIDTH];
 
 extern void GifDrawText8x8(SavedImage *Image,
-						   const int x, const int y,
-						   const char *legend, const int color);
+						   int x, int y,
+						   const char *legend, int color);
 
 extern void GifDrawBox(SavedImage *Image,
-					   const int x, const int y,
-					   const int w, const int d, const int color);
+					   int x, int y,
+					   int w, int d, int color);
 
 extern void GifDrawRectangle(SavedImage *Image,
-							 const int x, const int y,
-							 const int w, const int d, const int color);
+							 int x, int y,
+							 int w, int d, int color);
 
 extern void GifDrawBoxedText8x8(SavedImage *Image,
-								const int x, const int y,
+								int x, int y,
 								const char *legend,
-								const int border, const int bg, const int fg);
+								int border, int bg, int fg);
 
 #ifdef __cplusplus
 }

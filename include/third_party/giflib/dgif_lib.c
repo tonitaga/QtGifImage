@@ -301,13 +301,13 @@ DGifGetRecordType(GifFileType *GifFile, GifRecordType *Type) {
   }
 
   switch (Buf) {
-  case DESCRIPTOR_INTRODUCER:*Type = IMAGE_DESC_RECORD_TYPE;
+  case DESCRIPTOR_INTRODUCER: *Type = IMAGE_DESC_RECORD_TYPE;
 	break;
-  case EXTENSION_INTRODUCER:*Type = EXTENSION_RECORD_TYPE;
+  case EXTENSION_INTRODUCER: *Type = EXTENSION_RECORD_TYPE;
 	break;
-  case TERMINATOR_INTRODUCER:*Type = TERMINATE_RECORD_TYPE;
+  case TERMINATOR_INTRODUCER: *Type = TERMINATE_RECORD_TYPE;
 	break;
-  default:*Type = UNDEFINED_RECORD_TYPE;
+  default: *Type = UNDEFINED_RECORD_TYPE;
 	GifFile->Error = D_GIF_ERR_WRONG_RECORD;
 	return GIF_ERROR;
   }
@@ -1126,7 +1126,7 @@ DGifSlurp(GifFileType *GifFile) {
 	  }
 	  break;
 
-	case TERMINATE_RECORD_TYPE:break;
+	case TERMINATE_RECORD_TYPE: break;
 
 	default:    /* Should be trapped by DGifGetRecordType */
 	  break;
@@ -1135,5 +1135,3 @@ DGifSlurp(GifFileType *GifFile) {
 
   return (GIF_OK);
 }
-
-/* end */

@@ -59,7 +59,7 @@ void _InsertHashTable(GifHashTableType *HashTable, uint32_t Key, int Code) {
 
 #ifdef DEBUG_HIT_RATE
   NumberOfTests++;
-  NumberOfMisses++;
+	NumberOfMisses++;
 #endif /* DEBUG_HIT_RATE */
 
   while (HT_GET_KEY(HTable[HKey]) != 0xFFFFFL) {
@@ -81,7 +81,7 @@ int _ExistsHashTable(GifHashTableType *HashTable, uint32_t Key) {
 
 #ifdef DEBUG_HIT_RATE
   NumberOfTests++;
-  NumberOfMisses++;
+	NumberOfMisses++;
 #endif /* DEBUG_HIT_RATE */
 
   while ((HTKey = HT_GET_KEY(HTable[HKey])) != 0xFFFFFL) {
@@ -104,7 +104,7 @@ int _ExistsHashTable(GifHashTableType *HashTable, uint32_t Key) {
  evaluating more complex keys (such as twin prime keys) does not worth it!   *
 ******************************************************************************/
 static int KeyItem(uint32_t Item) {
-  return ((Item >> 12) ^ Item) & HT_KEY_MASK;
+  return (int)(((Item >> 12) ^ Item) & HT_KEY_MASK);
 }
 
 #ifdef    DEBUG_HIT_RATE
@@ -119,5 +119,3 @@ void HashTablePrintHitRatio(void)
 	NumberOfMisses * 100 / NumberOfTests);
 }
 #endif    /* DEBUG_HIT_RATE */
-
-/* end */

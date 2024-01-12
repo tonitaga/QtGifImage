@@ -9,7 +9,7 @@ gif_lib.h - service library for decoding and encoding GIF images
 
 #ifdef __cplusplus
 extern "C" {
-#endif // __cplusplus
+#endif /* __cplusplus */
 
 #define GIFLIB_MAJOR 5
 #define GIFLIB_MINOR 0
@@ -139,6 +139,7 @@ GifFileType *EGifOpen(void *userPtr, OutputFunc writeFunc, int *Error);
 int EGifSpew(GifFileType *GifFile);
 char *EGifGetGifVersion(GifFileType *GifFile); /* new in 5.x */
 int EGifCloseFile(GifFileType *GifFile);
+int EGifCloseFile1(GifFileType *GifFile);
 
 #define E_GIF_ERR_OPEN_FAILED    1    /* And EGif possible errors. */
 #define E_GIF_ERR_WRITE_FAILED   2
@@ -174,8 +175,7 @@ int EGifPutExtensionTrailer(GifFileType *GifFile);
 int EGifPutExtension(GifFileType *GifFile, const int GifExtCode,
 					 const int GifExtLen,
 					 const void *GifExtension);
-int EGifPutCode(GifFileType *GifFile, int GifCodeSize,
-				const GifByteType *GifCodeBlock);
+int EGifPutCode(GifFileType *GifFile, const GifByteType *GifCodeBlock);
 int EGifPutCodeNext(GifFileType *GifFile,
 					const GifByteType *GifCodeBlock);
 
@@ -251,7 +251,7 @@ extern ColorMapObject *GifUnionColorMap(const ColorMapObject *ColorIn1,
 extern int GifBitSize(int n);
 
 /******************************************************************************
- Support for the in-core structures allocation (slurp mode).              
+ Support for the in-core structures allocation (slurp mode).
 ******************************************************************************/
 
 extern void GifApplyTranslation(SavedImage *Image, GifPixelType Translation[]);
@@ -261,6 +261,7 @@ extern int GifAddExtensionBlock(int *ExtensionBlock_Count,
 								unsigned int Len, unsigned char ExtData[]);
 extern void GifFreeExtensions(int *ExtensionBlock_Count,
 							  ExtensionBlock **ExtensionBlocks);
+extern void FreeLastSavedImage(GifFileType *GifFile);
 extern SavedImage *GifMakeSavedImage(GifFileType *GifFile,
 									 const SavedImage *CopyFrom);
 extern void GifFreeSavedImages(GifFileType *GifFile);
@@ -283,7 +284,7 @@ int EGifGCBToSavedExtension(const GraphicsControlBlock *GCB,
 							int ImageIndex);
 
 /******************************************************************************
- The library's internal utility font                          
+ The library's internal utility font
 ******************************************************************************/
 
 #define GIF_FONT_WIDTH  8
@@ -309,5 +310,5 @@ extern void GifDrawBoxedText8x8(SavedImage *Image,
 
 #ifdef __cplusplus
 }
-#endif // __cplusplus
+#endif /* __cplusplus */
 #endif // GIF_LIB_GIF_LIB_H_

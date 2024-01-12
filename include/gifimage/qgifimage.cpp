@@ -33,7 +33,8 @@
 
 namespace {
 
-int writeToIODevice(GifFileType *gifFile, const GifByteType *data, int maxSize) {
+int writeToIODevice(GifFileType *gifFile, const GifByteType *data,
+					int maxSize) {
   return static_cast<int>(
 	  static_cast<QIODevice *>(
 		  gifFile->UserData)->write(
@@ -47,12 +48,13 @@ int readFromIODevice(GifFileType *gifFile, GifByteType *data, int maxSize) {
 		  reinterpret_cast<char *>(data), maxSize));
 }
 
-}
+}  // namespace
 
 QGifImagePrivate::QGifImagePrivate(QGifImage *p)
 	: loopCount(0), defaultDelayTime(1000), q_ptr(p) {}
 
-QVector<QRgb> QGifImagePrivate::colorTableFromColorMapObject(ColorMapObject *colorMap, int transColorIndex) const {
+QVector<QRgb> QGifImagePrivate::colorTableFromColorMapObject(
+	ColorMapObject *colorMap, int transColorIndex) const {
   QVector<QRgb> colorTable;
   if (colorMap) {
 	for (int idx = 0; idx < colorMap->ColorCount; ++idx) {
@@ -67,7 +69,8 @@ QVector<QRgb> QGifImagePrivate::colorTableFromColorMapObject(ColorMapObject *col
   return colorTable;
 }
 
-ColorMapObject *QGifImagePrivate::colorTableToColorMapObject(QVector<QRgb> colorTable) const {
+ColorMapObject *QGifImagePrivate::colorTableToColorMapObject(
+	QVector<QRgb> colorTable) const {
   if (colorTable.isEmpty())
 	return nullptr;
 
@@ -75,11 +78,13 @@ ColorMapObject *QGifImagePrivate::colorTableToColorMapObject(QVector<QRgb> color
   // num of colors must be a power of 2
   int numColors = 1 << GifBitSize(static_cast<int>(colorTable.size()));
   cmap->ColorCount = numColors;
-  //Maybe a bug of giflib, BitsPerPixel is used as size of the color table size.
-  cmap->BitsPerPixel = GifBitSize(static_cast<int>(colorTable.size())); //Todo!
+  // Maybe a bug of giflib, BitsPerPixel is used as size of the color table
+  // size.
+  cmap->BitsPerPixel = GifBitSize(static_cast<int>(colorTable.size()));  // Todo!
   cmap->SortFlag = false;
 
-  auto colorValues = (GifColorType *)calloc(numColors, sizeof(GifColorType));
+  auto colorValues =
+	  (GifColorType *)calloc(numColors, sizeof(GifColorType));
   for (int idx = 0; idx < colorTable.size(); ++idx) {
 	colorValues[idx].Red = qRed(colorTable[idx]);
 	colorValues[idx].Green = qGreen(colorTable[idx]);
@@ -92,11 +97,11 @@ ColorMapObject *QGifImagePrivate::colorTableToColorMapObject(QVector<QRgb> color
 }
 
 QSize QGifImagePrivate::getCanvasSize() const {
-  //If canvasSize has been set by user.
+  // If canvasSize has been set by user.
   if (canvasSize.isValid())
 	return canvasSize;
 
-  //Calc the right canvasSize from the frame size.
+  // Calc the right canvasSize from the frame size.
   int width = -1;
   int height = -1;
 	  foreach (QGifFrameInfoData info, frameInfos) {
@@ -110,10 +115,13 @@ QSize QGifImagePrivate::getCanvasSize() const {
   return {width, height};
 }
 
-int QGifImagePrivate::getFrameTransparentColorIndex(const QGifFrameInfoData &frameInfo) const {
+int QGifImagePrivate::getFrameTransparentColorIndex(
+	const QGifFrameInfoData &frameInfo) const {
   int index = -1;
 
-  QColor transColor = frameInfo.transparentColor.isValid() ? frameInfo.transparentColor : defaultTransparentColor;
+  QColor transColor = frameInfo.transparentColor.isValid()
+					  ? frameInfo.transparentColor
+					  : defaultTransparentColor;
 
   if (transColor.isValid()) {
 	if (!frameInfo.image.colorTable().isEmpty())
@@ -126,13 +134,16 @@ int QGifImagePrivate::getFrameTransparentColorIndex(const QGifFrameInfoData &fra
 }
 
 bool QGifImagePrivate::load(QIODevice *device) {
-  static int interlacedOffset[] = {0, 4, 2, 1}; /* The way Interlaced image should. */
-  static int interlacedJumps[] = {8, 8, 4, 2};    /* be read - offsets and jumps... */
+  static int interlacedOffset[] = {0, 4, 2,
+								   1}; /* The way Interlaced image should. */
+  static int interlacedJumps[] = {8, 8, 4,
+								  2}; /* be read - offsets and jumps... */
 
   int error;
   GifFileType *gifFile = DGifOpen(device, readFromIODevice, &error);
   if (!gifFile) {
-	qWarning(GifErrorString(error));
+	char *temp = GifErrorString(error);
+	qWarning("%s", temp);
 	return false;
   }
 
@@ -161,31 +172,35 @@ bool QGifImagePrivate::load(QIODevice *device) {
 
 	QVector<QRgb> colorTable;
 	if (gifImage.ImageDesc.ColorMap)
-	  colorTable = colorTableFromColorMapObject(gifImage.ImageDesc.ColorMap, transColorIndex);
+	  colorTable = colorTableFromColorMapObject(gifImage.ImageDesc.ColorMap,
+												transColorIndex);
 	else if (transColorIndex != -1)
-	  colorTable = colorTableFromColorMapObject(gifFile->SColorMap, transColorIndex);
+	  colorTable =
+		  colorTableFromColorMapObject(gifFile->SColorMap, transColorIndex);
 	else
 	  colorTable = globalColorTable;
 
 	if (transColorIndex != -1)
 	  frameInfo.transparentColor = colorTable[transColorIndex];
-	frameInfo.delayTime = gcb.DelayTime * 10; //convert to milliseconds
+	frameInfo.delayTime = gcb.DelayTime * 10;  // convert to milliseconds
 	frameInfo.interlace = gifImage.ImageDesc.Interlace;
 	frameInfo.offset = QPoint(left, top);
 
 	QImage image(width, height, QImage::Format_Indexed8);
-	image.setOffset(QPoint(left, top)); //Maybe useful for some users.
+	image.setOffset(QPoint(left, top));  // Maybe useful for some users.
 	image.setColorTable(colorTable);
 	if (transColorIndex != -1)
 	  image.fill(transColorIndex);
 	else if (!globalColorTable.isEmpty())
-	  image.fill(gifFile->SBackGroundColor); //!ToDo
+	  image.fill(gifFile->SBackGroundColor);  //! ToDo
 
 	if (gifImage.ImageDesc.Interlace) {
 	  int line = 0;
 	  for (int i = 0; i < 4; i++) {
-		for (int row = interlacedOffset[i]; row < height; row += interlacedJumps[i]) {
-		  memcpy(image.scanLine(row), gifImage.RasterBits + line * width, width);
+		for (int row = interlacedOffset[i]; row < height;
+			 row += interlacedJumps[i]) {
+		  memcpy(image.scanLine(row), gifImage.RasterBits + line * width,
+				 width);
 		  line++;
 		}
 	  }
@@ -195,16 +210,18 @@ bool QGifImagePrivate::load(QIODevice *device) {
 	  }
 	}
 
-	//Extract other data for the image.
+	// Extract other data for the image.
 	if (idx == 0) {
 	  if (gifImage.ExtensionBlockCount > 2) {
 		ExtensionBlock *extBlock = gifImage.ExtensionBlocks;
-		if (extBlock->Function == APPLICATION_EXT_FUNC_CODE && extBlock->ByteCount == 8) {
-		  if (QByteArray((char *)extBlock->Bytes) == QByteArray("NETSCAPE2.0")) {
+		if (extBlock->Function == APPLICATION_EXT_FUNC_CODE &&
+			extBlock->ByteCount == 8) {
+		  if (QByteArray((char *)extBlock->Bytes) ==
+			  QByteArray("NETSCAPE2.0")) {
 			ExtensionBlock *block = gifImage.ExtensionBlocks + 1;
 			if (block->ByteCount == 3) {
-			  loopCount = uchar(block->Bytes[1])
-				  + uchar((block->Bytes[2]) << 8);
+			  loopCount =
+				  uchar(block->Bytes[1]) + uchar((block->Bytes[2]) << 8);
 			}
 		  }
 		}
@@ -223,7 +240,8 @@ bool QGifImagePrivate::save(QIODevice *device) const {
   int error;
   GifFileType *gifFile = EGifOpen(device, writeToIODevice, &error);
   if (!gifFile) {
-	qWarning(GifErrorString(error));
+	char *temp = GifErrorString(error);
+	qWarning("%s", temp);
 	return false;
   }
 
@@ -238,13 +256,15 @@ bool QGifImagePrivate::save(QIODevice *device) const {
   }
 
   gifFile->ImageCount = static_cast<int>(frameInfos.size());
-  gifFile->SavedImages = (SavedImage *)calloc(frameInfos.size(), sizeof(SavedImage));
+  gifFile->SavedImages =
+	  (SavedImage *)calloc(frameInfos.size(), sizeof(SavedImage));
   for (int idx = 0; idx < frameInfos.size(); ++idx) {
 	const QGifFrameInfoData frameInfo = frameInfos.at(idx);
 	QImage image = frameInfo.image;
 	if (image.format() != QImage::Format_Indexed8) {
 	  if (!globalColorTable.isEmpty())
-		image = image.convertToFormat(QImage::Format_Indexed8, globalColorTable);
+		image =
+			image.convertToFormat(QImage::Format_Indexed8, globalColorTable);
 	  else
 		image = image.convertToFormat(QImage::Format_Indexed8);
 	}
@@ -257,12 +277,15 @@ bool QGifImagePrivate::save(QIODevice *device) const {
 	gifImage->ImageDesc.Height = image.height();
 	gifImage->ImageDesc.Interlace = frameInfo.interlace;
 
-	if (!image.colorTable().isEmpty() && (image.colorTable() != globalColorTable))
-	  gifImage->ImageDesc.ColorMap = colorTableToColorMapObject(image.colorTable());
+	if (!image.colorTable().isEmpty() &&
+		(image.colorTable() != globalColorTable))
+	  gifImage->ImageDesc.ColorMap =
+		  colorTableToColorMapObject(image.colorTable());
 	else
 	  gifImage->ImageDesc.ColorMap = nullptr;
 
-	auto data = (GifByteType *)malloc(image.width() * image.height() * sizeof(GifByteType));
+	auto data = (GifByteType *)malloc(image.width() * image.height() *
+		sizeof(GifByteType));
 	for (int row = 0; row < image.height(); ++row) {
 	  memcpy(data + row * image.width(), image.scanLine(row), image.width());
 	}
@@ -272,14 +295,14 @@ bool QGifImagePrivate::save(QIODevice *device) const {
 	  uchar data8[12] = "NETSCAPE2.0";
 	  GifAddExtensionBlock(&gifImage->ExtensionBlockCount,
 						   &gifImage->ExtensionBlocks,
-						   APPLICATION_EXT_FUNC_CODE,
-						   11,
-						   data8);
+						   APPLICATION_EXT_FUNC_CODE, 11, data8);
 	  uchar data_char[3];
 	  data_char[0] = 0x01;
 	  data_char[1] = loopCount & 0xFF;
 	  data_char[2] = (loopCount >> 8) & 0xFF;
-	  GifAddExtensionBlock(&gifImage->ExtensionBlockCount, &gifImage->ExtensionBlocks, CONTINUE_EXT_FUNC_CODE, 3, data_char);
+	  GifAddExtensionBlock(&gifImage->ExtensionBlockCount,
+						   &gifImage->ExtensionBlocks, CONTINUE_EXT_FUNC_CODE,
+						   3, data_char);
 	}
 
 	GraphicsControlBlock gcbBlock;
@@ -288,19 +311,17 @@ bool QGifImagePrivate::save(QIODevice *device) const {
 	gcbBlock.TransparentColor = getFrameTransparentColorIndex(frameInfo);
 
 	if (frameInfo.delayTime != -1)
-	  gcbBlock.DelayTime = frameInfo.delayTime / 10; //convert from milliseconds
+	  gcbBlock.DelayTime =
+		  frameInfo.delayTime / 10;  // convert from milliseconds
 	else
 	  gcbBlock.DelayTime = defaultDelayTime / 10;
 
 	EGifGCBToSavedExtension(&gcbBlock, gifFile, idx);
   }
-
   EGifSpew(gifFile);
-  //EGifCloseFile(gifFile);
 
   return true;
 }
-
 
 /*!
     \class QGifImage
@@ -311,8 +332,7 @@ bool QGifImagePrivate::save(QIODevice *device) const {
 /*!
     Constructs a gif image
 */
-QGifImage::QGifImage()
-	: d_ptr(new QGifImagePrivate(this)) {}
+QGifImage::QGifImage() : d_ptr(new QGifImagePrivate(this)) {}
 
 /*!
     Constructs a gif image and tries to load the image from the
@@ -326,17 +346,14 @@ QGifImage::QGifImage(const QString &fileName)
 /*!
     Constructs a gif image with the given \a size
 */
-QGifImage::QGifImage(const QSize &size)
-	: d_ptr(new QGifImagePrivate(this)) {
+QGifImage::QGifImage(const QSize &size) : d_ptr(new QGifImagePrivate(this)) {
   d_ptr->canvasSize = size;
 }
 
 /*!
     Destroys the gif image and cleans up.
 */
-QGifImage::~QGifImage() {
-  delete d_ptr;
-}
+QGifImage::~QGifImage() { delete d_ptr; }
 
 /*!
     Return global color table.
@@ -363,7 +380,8 @@ QColor QGifImage::backgroundColor() const {
     support semi-transparent pixels. So the alpha channel of the color table
     will be ignored.
 */
-void QGifImage::setGlobalColorTable(const QVector<QRgb> &colors, const QColor &bgColor) {
+void QGifImage::setGlobalColorTable(const QVector<QRgb> &colors,
+									const QColor &bgColor) {
   Q_D(QGifImage);
   d->globalColorTable = colors;
   d->bgColor = bgColor;
@@ -420,7 +438,8 @@ int QGifImage::loopCount() const {
 }
 
 /*!
-    Set the loop count. The default value of \a loop is 0, which means loop forever.
+    Set the loop count. The default value of \a loop is 0, which means loop
+   forever.
 */
 void QGifImage::setLoopCount(int loop) {
   Q_D(QGifImage);
@@ -430,9 +449,9 @@ void QGifImage::setLoopCount(int loop) {
 /*!
     Insert the QImage object \a frame at position \a index with \a delay.
 
-    As gif file only support indexed image, so all the \a frame will be converted
-    to the QImage::Format_Indexed8 format. Global color table will be used in the
-    convertion if it has been set.
+    As gif file only support indexed image, so all the \a frame will be
+   converted to the QImage::Format_Indexed8 format. Global color table will be
+   used in the convertion if it has been set.
 
     QImage::offset() will be used when insert the QImage to the gif canvas.
 */
@@ -450,14 +469,15 @@ void QGifImage::insertFrame(int index, const QImage &frame, int delay) {
 /*!
     \overload
 
-    Insert the QImage object \a frame at position \a index with the given \a offset and
-    \a delay.
+    Insert the QImage object \a frame at position \a index with the given \a
+   offset and \a delay.
 
-    As gif file only support indexed image, so all the \a frame will be converted
-    to the QImage::Format_Indexed8 format. Global color table will be used in the
-    convertion if it has been set.
+    As gif file only support indexed image, so all the \a frame will be
+   converted to the QImage::Format_Indexed8 format. Global color table will be
+   used in the convertion if it has been set.
 */
-void QGifImage::insertFrame(int index, const QImage &frame, const QPoint &offset, int delay) {
+void QGifImage::insertFrame(int index, const QImage &frame,
+							const QPoint &offset, int delay) {
   Q_D(QGifImage);
   QGifFrameInfoData data;
   data.image = frame;
@@ -470,9 +490,9 @@ void QGifImage::insertFrame(int index, const QImage &frame, const QPoint &offset
 /*!
     Append the QImage object \a frame with \a delay.
 
-    As gif file only support indexed image, so all the \a frame will be converted
-    to the QImage::Format_Indexed8 format. Global color table will be used in the
-    convertion if it has been set.
+    As gif file only support indexed image, so all the \a frame will be
+   converted to the QImage::Format_Indexed8 format. Global color table will be
+   used in the convertion if it has been set.
 
     QImage::offset() will be used when insert the QImage to the gif canvas.
 */
@@ -575,11 +595,11 @@ QColor QGifImage::frameTransparentColor(int index) const {
 }
 
 /*!
-    Sets the transparent \a color of the frame \a index. Unlike other image formats
-    that support alpha (e.g. PNG), GIF does not support semi-transparent pixels.
-    The way to achieve transparency is to set a color that will be transparent
-    when rendering the GIF. So, if you set the transparent color to black, the
-    black pixels in your gif file will be transparent.
+    Sets the transparent \a color of the frame \a index. Unlike other image
+   formats that support alpha (e.g. PNG), GIF does not support semi-transparent
+   pixels. The way to achieve transparency is to set a color that will be
+   transparent when rendering the GIF. So, if you set the transparent color to
+   black, the black pixels in your gif file will be transparent.
 */
 void QGifImage::setFrameTransparentColor(int index, const QColor &color) {
   Q_D(QGifImage);
@@ -596,8 +616,12 @@ void QGifImage::setFrameTransparentColor(int index, const QColor &color) {
 bool QGifImage::save(const QString &fileName) const {
   Q_D(const QGifImage);
   QFile file(fileName);
-  if (file.open(QIODevice::WriteOnly))
-	return d->save(&file);
+  if (file.open(QIODevice::WriteOnly)) {
+	bool res = d->save(&file);
+//      d->~QGifImagePrivate();
+//      delete d;
+	return res;
+  }
 
   return false;
 }
@@ -616,9 +640,9 @@ bool QGifImage::save(QIODevice *device) const {
 }
 
 /*!
-    Loads an gif image from the file with the given \a fileName. Returns \c true if
-    the image was successfully loaded; otherwise invalidates the image
-    and returns \c false.
+    Loads an gif image from the file with the given \a fileName. Returns \c true
+   if the image was successfully loaded; otherwise invalidates the image and
+   returns \c false.
 */
 bool QGifImage::load(const QString &fileName) {
   Q_D(QGifImage);

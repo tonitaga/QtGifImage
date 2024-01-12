@@ -131,7 +131,7 @@ GifQuantizeBuffer(unsigned int Width,
   }
   if (NewColorMapSize < *ColorMapSize) {
 	/* And clear rest of color map: */
-	for (i = NewColorMapSize; i < *ColorMapSize; i++)
+	for (i = (int)(NewColorMapSize); i < *ColorMapSize; i++)
 	  OutputColorMap[i].Red = OutputColorMap[i].Green =
 	  OutputColorMap[i].Blue = 0;
   }
@@ -139,7 +139,7 @@ GifQuantizeBuffer(unsigned int Width,
   /* Average the colors in each entry to be the color to be used in the
    * output color map, and plug it into the output color map itself. */
   for (i = 0; i < NewColorMapSize; i++) {
-	if ((j = NewColorSubdiv[i].NumEntries) > 0) {
+	if ((j = (int)(NewColorSubdiv[i].NumEntries)) > 0) {
 	  QuantizedColor = NewColorSubdiv[i].QuantizedColors;
 	  Red = Green = Blue = 0;
 	  while (QuantizedColor) {
@@ -176,13 +176,13 @@ GifQuantizeBuffer(unsigned int Width,
 
 #ifdef DEBUG
   fprintf(stderr,
-		  "Quantization L(0) errors: Red = %d, Green = %d, Blue = %d.\n",
-		  MaxRGBError[0], MaxRGBError[1], MaxRGBError[2]);
+			"Quantization L(0) errors: Red = %d, Green = %d, Blue = %d.\n",
+			MaxRGBError[0], MaxRGBError[1], MaxRGBError[2]);
 #endif /* DEBUG */
 
   free((char *)ColorArrayEntries);
 
-  *ColorMapSize = NewColorMapSize;
+  *ColorMapSize = (int)(NewColorMapSize);
 
   return GIF_OK;
 }
@@ -212,7 +212,7 @@ SubdivColorMap(NewColorMapType *NewColorSubdiv,
 			(NewColorSubdiv[i].NumEntries > 1)) {
 		  MaxSize = NewColorSubdiv[i].RGBWidth[j];
 		  Index = i;
-		  SortRGBAxis = j;
+		  SortRGBAxis = (int)(j);
 		}
 	  }
 	}
@@ -245,7 +245,7 @@ SubdivColorMap(NewColorMapType *NewColorSubdiv,
 	free((char *)SortArray);
 
 	/* Now simply add the Counts until we have half of the Count: */
-	Sum = NewColorSubdiv[Index].Count / 2 - QuantizedColor->Count;
+	Sum = (long int)(NewColorSubdiv[Index].Count / 2 - QuantizedColor->Count);
 	NumEntries = 1;
 	Count = QuantizedColor->Count;
 	while (QuantizedColor->Pnext != NULL &&
@@ -305,5 +305,3 @@ SortCmpRtn(const void *Entry1,
   return (*((QuantizedColorType **)Entry1))->RGB[SortRGBAxis] -
 	  (*((QuantizedColorType **)Entry2))->RGB[SortRGBAxis];
 }
-
-/* end */

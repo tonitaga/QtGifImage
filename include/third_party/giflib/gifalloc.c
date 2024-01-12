@@ -12,12 +12,11 @@
 #define MAX(x, y)    (((x) > (y)) ? (x) : (y))
 
 /******************************************************************************
- Miscellaneous utility functions                          
+ Miscellaneous utility functions
 ******************************************************************************/
 
 /* return smallest bitfield size n will fit in */
-int
-GifBitSize(int n) {
+int GifBitSize(int n) {
   register int i;
 
   for (i = 1; i <= 8; i++)
@@ -27,7 +26,7 @@ GifBitSize(int n) {
 }
 
 /******************************************************************************
-  Color map object functions                              
+  Color map object functions
 ******************************************************************************/
 
 /*
@@ -71,8 +70,10 @@ Free a color map object
 *******************************************************************************/
 void
 GifFreeMapObject(ColorMapObject *Object) {
-  if (Object != NULL) {
+  if (Object->Colors != NULL) {
 	(void)free(Object->Colors);
+  }
+  if (Object) {
 	(void)free(Object);
   }
 }
@@ -99,7 +100,7 @@ DumpColorMap(ColorMapObject *Object,
 #endif /* DEBUG */
 
 /*******************************************************************************
- Compute the union of two given color maps and return it.  If result can't 
+ Compute the union of two given color maps and return it.  If result can't
  fit into 256 colors, NULL is returned, the allocated union otherwise.
  ColorIn1 is copied as is to ColorUnion, while colors from ColorIn2 are
  copied iff they didn't exist before.  ColorTransIn2 maps the old
@@ -205,7 +206,7 @@ GifApplyTranslation(SavedImage *Image, GifPixelType Translation[]) {
 }
 
 /******************************************************************************
- Extension record functions                              
+ Extension record functions
 ******************************************************************************/
 int
 GifAddExtensionBlock(int *ExtensionBlockCount,
@@ -228,7 +229,7 @@ GifAddExtensionBlock(int *ExtensionBlockCount,
   ep = &(*ExtensionBlocks)[(*ExtensionBlockCount)++];
 
   ep->Function = Function;
-  ep->ByteCount = Len;
+  ep->ByteCount = (int)(Len);
   ep->Bytes = (GifByteType *)malloc(ep->ByteCount);
   if (ep->Bytes == NULL)
 	return (GIF_ERROR);
@@ -258,7 +259,7 @@ GifFreeExtensions(int *ExtensionBlockCount,
 }
 
 /******************************************************************************
- Image block allocation functions                          
+ Image block allocation functions
 ******************************************************************************/
 
 /* Private Function:
@@ -297,7 +298,7 @@ FreeLastSavedImage(GifFileType *GifFile) {
 }
 
 /*
- * Append an image block to the SavedImages array  
+ * Append an image block to the SavedImages array
  */
 SavedImage *
 GifMakeSavedImage(GifFileType *GifFile, const SavedImage *CopyFrom) {
@@ -385,5 +386,3 @@ GifFreeSavedImages(GifFileType *GifFile) {
   free((char *)GifFile->SavedImages);
   GifFile->SavedImages = NULL;
 }
-
-/* end */

@@ -763,12 +763,11 @@ EGifCloseFile(GifFileType *GifFile) {
 	GifFreeMapObject(GifFile->SColorMap);
 	GifFile->SColorMap = NULL;
   }
-  if (Private) {
-	if (Private->HashTable) {
-	  free((char *)Private->HashTable);
-	}
-	free((char *)Private);
+
+  if (Private->HashTable != NULL) {
+	free((char *)Private->HashTable);
   }
+  free((char *)Private);
 
   if (File && fclose(File) != 0) {
 	GifFile->Error = E_GIF_ERR_CLOSE_FAILED;
@@ -813,16 +812,15 @@ EGifCloseFile1(GifFileType *GifFile) {
 //        GifFreeMapObject(GifFile->Image.ColorMap);
 //        GifFile->Image.ColorMap = NULL;
 //    }
-  if (GifFile->SColorMap) {
+  if (GifFile->SColorMap != NULL) {
 	GifFreeMapObject(GifFile->SColorMap);
 	GifFile->SColorMap = NULL;
   }
-  if (Private) {
-	if (Private->HashTable) {
-	  free((char *)Private->HashTable);
-	}
-	free((char *)Private);
+
+  if (Private->HashTable) {
+	free((char *)Private->HashTable);
   }
+  free((char *)Private);
 
   if (File && fclose(File) != 0) {
 	GifFile->Error = E_GIF_ERR_CLOSE_FAILED;

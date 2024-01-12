@@ -238,8 +238,10 @@ SubdivColorMap(NewColorMapType *NewColorSubdiv,
 		  sizeof(QuantizedColorType *), SortCmpRtn);
 
 	/* Relink the sorted list into one: */
-	for (j = 0; j < NewColorSubdiv[Index].NumEntries - 1; j++)
+	for (j = 0; j < NewColorSubdiv[Index].NumEntries - 1; j++) {
 	  SortArray[j]->Pnext = SortArray[j + 1];
+	}
+
 	SortArray[NewColorSubdiv[Index].NumEntries - 1]->Pnext = NULL;
 	NewColorSubdiv[Index].QuantizedColors = QuantizedColor = SortArray[0];
 	free((char *)SortArray);
